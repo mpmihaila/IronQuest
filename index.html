@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronQuest">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>IronQuest — The Golden Arcade</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --gold: #d4a017;
+  --gold-light: #f0c850;
+  --gold-dark: #8b6914;
+  --bronze: #cd7f32;
+  --silver: #a8a8a8;
+  --bg: #0a0a0f;
+  --bg-card: #111118;
+  --bg-card2: #16161f;
+  --text: #d8d0c0;
+  --text-dim: #605848;
+  --red: #e03030;
+  --green: #30c060;
+  --blue: #3080e0;
+  --purple: #a040e0;
+  --cyan: #00e5ff;
+  --neon-gold: #ffd700;
+  --pink: #ff40a0;
+  --pixel: 'Press Start 2P', monospace;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html { overflow-x: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--pixel);
+  font-size: 10px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: none;
+  padding-bottom: calc(64px + var(--safe-bottom));
+}
+
+/* CRT Scanlines */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 6px);
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* Pixel-perfect scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--gold-dark); }
+
+/* ============ PIXEL ART ICONS ============ */
+.px-icon {
+  display: inline-block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+}
+.px-icon-sm { width:16px; height:16px; }
+.px-icon-lg { width:32px; height:32px; }
+
+/* Pixel art via CSS box-shadow technique */
+.pixel-art {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  image-rendering: pixelated;
+  position: relative;
+}
+
+/* ============ HEADER ============ */
+.header {
+  background: linear-gradient(180deg, #14141c, var(--bg));
+  border-bottom: 3px solid var(--gold-dark);
+  padding: calc(8px + var(--safe-top)) 12px 8px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: var(--pixel);
+  font-size: 16px;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,160,23,0.6), 2px 2px 0 #000;
+  letter-spacing: 3px;
+}
+.logo .q { color: var(--cyan); text-shadow: 0 0 20px rgba(0,229,255,0.6), 2px 2px 0 #000; }
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  gap: 6px;
+}
+
+.h-stat {
+  text-align: center;
+  flex: 1;
+}
+.h-stat-val {
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--gold-light);
+}
+.h-stat-lbl {
+  font-size: 6px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Player rank badge */
+.rank-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: var(--pixel);
+  font-size: 7px;
+  letter-spacing: 1px;
+  border: 1px solid;
+}
+.rank-recruit { color:#888; border-color:#555; background:rgba(136,136,136,0.1); }
+.rank-bronze { color:#cd7f32; border-color:#cd7f32; background:rgba(205,127,50,0.1); }
+.rank-silver { color:#c0c0c0; border-color:#c0c0c0; background:rgba(192,192,192,0.1); }
+.rank-gold { color:#ffd700; border-color:#d4a017; background:rgba(255,215,0,0.1); }
+.rank-platinum { color:#00e5ff; border-color:#00b8cc; background:rgba(0,229,255,0.1); }
+.rank-diamond { color:#b9f2ff; border-color:#88d8e8; background:rgba(185,242,255,0.1); text-shadow:0 0 6px rgba(185,242,255,0.5); }
+.rank-master { color:#a040e0; border-color:#a040e0; background:rgba(160,64,224,0.1); text-shadow:0 0 8px rgba(160,64,224,0.5); }
+.rank-legend { color:#ff40a0; border-color:#ff40a0; background:rgba(255,64,160,0.1); text-shadow:0 0 10px rgba(255,64,160,0.5); animation:legendGlow 2s ease infinite alternate; }
+@keyframes legendGlow {
+  0% { text-shadow:0 0 10px #ff40a0; }
+  50% { text-shadow:0 0 10px #ffd700; }
+  100% { text-shadow:0 0 10px #00e5ff; }
+}
+.rank-mythic { background:linear-gradient(90deg,#ff0040,#ff8000,#ffd700,#00ff80,#00e5ff,#a040e0,#ff0040); -webkit-background-clip:text; -webkit-text-fill-color:transparent; border-image:linear-gradient(90deg,#ff0040,#ffd700,#00e5ff,#a040e0) 1; animation:mythicShift 3s linear infinite; background-size:200% 100%; }
+@keyframes mythicShift { 0%{background-position:0%} 100%{background-position:200%} }
+
+/* Player XP bar */
+.player-xp {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+.player-lvl {
+  font-size: 8px;
+  color: var(--cyan);
+}
+.xp-track {
+  width: 120px;
+  height: 12px;
+  background: #1a1a2e;
+  border: 2px solid #333;
+  position: relative;
+  overflow: hidden;
+}
+.xp-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.5s;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3), 0 0 6px rgba(212,160,23,0.5);
+}
+.xp-label {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:5px;
+  color:#fff;
+  text-shadow:1px 1px 0 #000;
+  z-index:1;
+}
+
+/* ============ BOTTOM NAV (Mobile) ============ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0d0d14;
+  border-top: 2px solid var(--gold-dark);
+  display: flex;
+  z-index: 200;
+  padding-bottom: var(--safe-bottom);
+}
+.bnav-btn {
+  flex: 1;
+  padding: 8px 2px 6px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--pixel);
+  font-size: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.bnav-btn .bnav-icon { font-size: 16px; line-height: 1; }
+.bnav-btn.active { color: var(--gold); }
+.bnav-btn:active { color: var(--gold-light); }
+
+/* ============ MAIN ============ */
+.main {
+  padding: 10px;
+  padding-left: calc(10px + var(--safe-left));
+  padding-right: calc(10px + var(--safe-right));
+  max-width: 600px;
+  margin: 0 auto;
+}
+.page { display:none; }
+.page.active { display:block; }
+
+/* ============ CARD ============ */
+.card {
+  background: var(--bg-card);
+  border: 2px solid #222;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.card-title {
+  font-size: 10px;
+  color: var(--gold);
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 0 #000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============ PIXEL MUSCLE ICONS (CSS art) ============ */
+.mi { display:inline-block; font-size:20px; line-height:1; text-shadow:2px 2px 0 #000; }
+
+/* ============ MUSCLE GRID ============ */
+.muscle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.muscle-card {
+  background: var(--bg-card);
+  border: 2px solid #222;
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  -webkit-touch-callout: none;
+  user-select: none;
+  position: relative;
+}
+.muscle-card:active { border-color: var(--gold); background: var(--bg-card2); }
+.muscle-card .mi { font-size: 24px; }
+.muscle-name { font-size: 8px; color: var(--text); margin: 4px 0 2px; }
+.muscle-rank-line { display:flex; align-items:center; gap:4px; margin-bottom:6px; }
+
+.xp-bar {
+  width: 100%;
+  height: 10px;
+  background: #1a1a2e;
+  border: 1px solid #333;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.xp-bar-fill {
+  height: 100%;
+  transition: width 0.5s;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+}
+.xp-bar-text {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:5px;
+  color:#fff;
+  text-shadow:1px 1px 0 #000;
+}
+
+.muscle-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.ms-item { text-align:center; }
+.ms-val { font-size:8px; color:var(--gold-light); }
+.ms-lbl { font-size:5px; color:var(--text-dim); margin-top:1px; }
+
+/* ============ FORMS ============ */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.cols-1 { grid-template-columns: 1fr; }
+.form-group { display:flex; flex-direction:column; gap:3px; }
+.form-lbl { font-size:6px; color:var(--text-dim); text-transform:uppercase; }
+.form-input, .form-select {
+  background: #1a1a2e;
+  border: 2px solid #333;
+  color: var(--text);
+  padding: 10px 8px;
+  font-family: var(--pixel);
+  font-size: 10px;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(212,160,23,0.3);
+}
+.form-select { padding-right: 24px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23d4a017'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
+.form-select option { background:#1a1a2e; }
+
+/* ============ BUTTONS ============ */
+.btn {
+  padding: 12px 16px;
+  border: 2px solid;
+  font-family: var(--pixel);
+  font-size: 9px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.1s;
+  -webkit-touch-callout: none;
+  background: none;
+}
+.btn:active { transform: scale(0.96); }
+.btn-gold { border-color:var(--gold); color:var(--gold); background:rgba(212,160,23,0.1); }
+.btn-gold:active { background:rgba(212,160,23,0.3); }
+.btn-red { border-color:var(--red); color:var(--red); background:rgba(224,48,48,0.1); }
+.btn-cyan { border-color:var(--cyan); color:var(--cyan); background:rgba(0,229,255,0.1); }
+.btn-sm { padding:8px 10px; font-size:7px; }
+.btn-block { width:100%; }
+.btn-row { display:flex; gap:6px; flex-wrap:wrap; }
+
+/* ============ SET ENTRY ============ */
+.set-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: #0d0d18;
+  border: 1px solid #1a1a2e;
+  margin-bottom: 4px;
+  font-size: 8px;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+.set-num { color:var(--cyan); min-width:36px; }
+.set-info { flex:1; color:var(--text-dim); }
+.set-info b { color:var(--text); }
+.set-vol { color:var(--gold); font-size:7px; }
+.set-xp { color:var(--green); font-size:7px; }
+.set-del { background:none; border:none; color:var(--red); font-size:14px; padding:4px; cursor:pointer; }
+
+/* ============ XP POPUP ============ */
+.xp-popup {
+  position:fixed;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:1000;
+  font-family:var(--pixel);
+  font-size:20px;
+  color:var(--neon-gold);
+  text-shadow:0 0 20px var(--neon-gold), 0 0 40px var(--gold), 2px 2px 0 #000;
+  pointer-events:none;
+  animation:xpPop 1.5s ease forwards;
+}
+@keyframes xpPop {
+  0% { opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+  15% { opacity:1; transform:translate(-50%,-50%) scale(1.3); }
+  30% { transform:translate(-50%,-50%) scale(1); }
+  100% { opacity:0; transform:translate(-50%,-80%) scale(1); }
+}
+
+/* Level up overlay */
+.lvlup-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  z-index:2000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:fadeIn 0.3s;
+  -webkit-touch-callout:none;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.lvlup-box { text-align:center; animation:lvlBounce 0.5s ease; }
+@keyframes lvlBounce { 0%{transform:scale(0)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+.lvlup-title {
+  font-size:18px;
+  color:var(--neon-gold);
+  text-shadow:0 0 30px var(--neon-gold), 0 0 60px var(--gold), 2px 2px 0 #000;
+  margin-bottom:12px;
+}
+.lvlup-muscle { font-size:14px; color:var(--text); letter-spacing:3px; }
+.lvlup-level {
+  font-size:28px;
+  color:var(--cyan);
+  text-shadow:0 0 20px var(--cyan), 2px 2px 0 #000;
+  margin:10px 0;
+}
+.lvlup-rank { margin:8px 0; }
+.lvlup-dismiss { font-size:7px; color:var(--text-dim); margin-top:16px; }
+
+/* ============ HISTORY ============ */
+.workout-entry {
+  background: var(--bg-card);
+  border: 2px solid #222;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.workout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.workout-name { font-size:9px; color:var(--gold); }
+.workout-date { font-size:6px; color:var(--text-dim); }
+.workout-meta { display:flex; gap:10px; font-size:7px; color:var(--text-dim); margin-bottom:6px; }
+.workout-meta b { color:var(--gold-light); }
+.workout-sets { font-size:7px; }
+.workout-set-row {
+  display:flex;
+  justify-content:space-between;
+  padding:3px 0;
+  border-bottom:1px solid #1a1a2e;
+}
+.workout-del { background:none; border:none; color:var(--text-dim); font-size:12px; cursor:pointer; padding:2px; }
+.workout-del:active { color:var(--red); }
+
+/* ============ STATS ============ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 2px solid #222;
+  padding: 10px 6px;
+  text-align: center;
+}
+.stat-val { font-size:12px; color:var(--gold); text-shadow:0 0 8px rgba(212,160,23,0.3); }
+.stat-lbl { font-size:5px; color:var(--text-dim); margin-top:3px; text-transform:uppercase; }
+
+.vol-bar-group { margin-bottom:8px; }
+.vol-bar-top { display:flex; justify-content:space-between; font-size:7px; margin-bottom:2px; }
+.vol-bar { height:14px; background:#1a1a2e; border:1px solid #222; overflow:hidden; }
+.vol-bar-fill { height:100%; transition:width 0.5s; box-shadow:inset 0 -2px 0 rgba(0,0,0,0.3); }
+
+.overload-badge {
+  font-size:6px;
+  padding:1px 4px;
+  border:1px solid;
+}
+.ob-up { color:var(--green); border-color:var(--green); }
+.ob-down { color:var(--red); border-color:var(--red); }
+.ob-same { color:var(--text-dim); border-color:#333; }
+
+/* ============ CROSSOVER ============ */
+.cross-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.cross-item {
+  background:#0d0d18;
+  border:1px solid #1a1a2e;
+  padding:8px;
+}
+.cross-lbl { font-size:6px; color:var(--text-dim); }
+.cross-val { font-size:10px; color:var(--gold-light); margin-top:2px; }
+
+/* ============ GUIDE ============ */
+.guide-card {
+  background:var(--bg-card);
+  border:2px solid #222;
+  padding:10px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.guide-card:active { border-color:var(--gold-dark); }
+.guide-head { display:flex; align-items:center; gap:8px; }
+.guide-muscle-name { font-size:9px; color:var(--gold); }
+.guide-count { font-size:6px; color:var(--text-dim); }
+.guide-body { display:none; margin-top:10px; padding-top:8px; border-top:1px solid #222; }
+.guide-card.open .guide-body { display:block; }
+.guide-exercise {
+  margin-bottom:10px;
+  padding:8px;
+  background:#0d0d18;
+  border-left:3px solid var(--gold-dark);
+}
+.guide-ex-name { font-size:8px; color:var(--gold-light); margin-bottom:4px; }
+.guide-ex-text { font-size:7px; color:var(--text-dim); line-height:1.6; font-family:'Courier New',monospace; }
+.guide-sci { font-size:6px; color:var(--cyan); margin-top:4px; padding:4px 6px; background:rgba(0,229,255,0.05); border-left:2px solid var(--cyan); font-family:'Courier New',monospace; line-height:1.5; }
+.guide-tags { margin-top:4px; display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+.tag {
+  font-size:5px;
+  padding:2px 5px;
+  border:1px solid;
+  letter-spacing:0.5px;
+}
+.tag-c { color:var(--green); border-color:var(--green); }
+.tag-i { color:var(--blue); border-color:var(--blue); }
+.tag-o { color:var(--gold); border-color:var(--gold); background:rgba(212,160,23,0.1); }
+.tag-rep { color:var(--text-dim); border-color:#333; }
+
+/* Volume rec box */
+.vol-rec {
+  background:rgba(212,160,23,0.06);
+  border:1px solid var(--gold-dark);
+  padding:8px;
+  margin-bottom:10px;
+}
+.vol-rec-title { font-size:6px; color:var(--gold); margin-bottom:4px; }
+.vol-rec-nums { display:flex; gap:10px; font-size:7px; margin-bottom:3px; }
+.vol-rec-note { font-size:6px; color:var(--text-dim); line-height:1.4; font-family:'Courier New',monospace; }
+
+/* ============ TOOLS ============ */
+.timer-display {
+  font-size:40px;
+  text-align:center;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(212,160,23,0.4), 2px 2px 0 #000;
+  margin:12px 0;
+  letter-spacing:4px;
+}
+.timer-display.warn { color:var(--red); text-shadow:0 0 20px rgba(224,48,48,0.5); animation:pulse 0.5s infinite alternate; }
+@keyframes pulse { from{opacity:1} to{opacity:0.5} }
+.timer-presets { display:flex; gap:4px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+.timer-pre {
+  padding:8px 12px;
+  background:#1a1a2e;
+  border:2px solid #333;
+  color:var(--text);
+  font-family:var(--pixel);
+  font-size:8px;
+  cursor:pointer;
+}
+.timer-pre.active, .timer-pre:active { border-color:var(--gold); color:var(--gold); }
+
+/* PR Board */
+.pr-card {
+  background:#0d0d18;
+  border:1px solid #1a1a2e;
+  border-left:3px solid var(--gold);
+  padding:8px;
+  margin-bottom:6px;
+}
+.pr-name { font-size:8px; color:var(--gold-light); margin-bottom:2px; }
+.pr-val { font-size:14px; color:var(--gold); }
+.pr-detail { font-size:6px; color:var(--text-dim); margin-top:2px; }
+.pr-medal { font-size:6px; padding:1px 4px; border:1px solid var(--gold); color:var(--gold); background:rgba(212,160,23,0.15); margin-top:3px; display:inline-block; }
+
+/* Body measurements */
+.meas-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:6px 0;
+  border-bottom:1px solid #1a1a2e;
+  font-size:8px;
+}
+.meas-lbl { color:var(--text); }
+.meas-val { color:var(--gold-light); }
+.meas-change { font-size:6px; }
+.mc-up { color:var(--green); }
+.mc-down { color:var(--red); }
+
+/* Template card */
+.tpl-card {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px;
+  background:#0d0d18;
+  border:1px solid #1a1a2e;
+  margin-bottom:4px;
+}
+.tpl-name { font-size:8px; color:var(--text); }
+.tpl-info { font-size:6px; color:var(--text-dim); margin-top:2px; }
+.tpl-actions { display:flex; gap:4px; }
+
+/* ============ FILTER BTNS ============ */
+.filters { display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
+.f-btn {
+  padding:6px 10px;
+  background:#1a1a2e;
+  border:1px solid #333;
+  color:var(--text-dim);
+  font-family:var(--pixel);
+  font-size:6px;
+  cursor:pointer;
+}
+.f-btn.active, .f-btn:active { border-color:var(--gold); color:var(--gold); }
+
+/* ============ MODAL ============ */
+.modal-bg {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:1500;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+}
+.modal-sheet {
+  background:var(--bg-card);
+  border-top:3px solid var(--gold-dark);
+  width:100%;
+  max-width:600px;
+  max-height:85vh;
+  overflow-y:auto;
+  padding:16px 12px calc(16px + var(--safe-bottom));
+  animation:sheetUp 0.3s ease;
+}
+@keyframes sheetUp { from{transform:translateY(100%)} to{transform:none} }
+.modal-close {
+  position:absolute;
+  top:8px;
+  right:12px;
+  background:none;
+  border:none;
+  color:var(--text-dim);
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* ============ TOAST ============ */
+.toast {
+  position:fixed;
+  top:calc(var(--safe-top) + 60px);
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--bg-card);
+  border:2px solid var(--gold);
+  padding:10px 14px;
+  font-family:var(--pixel);
+  font-size:7px;
+  color:var(--gold-light);
+  z-index:3000;
+  animation:toastIn 0.2s ease, toastOut 0.3s ease 2.7s forwards;
+  box-shadow:0 0 20px rgba(212,160,23,0.3);
+  text-align:center;
+  max-width:90%;
+}
+@keyframes toastIn { from{opacity:0;transform:translate(-50%,-10px)} to{opacity:1;transform:translate(-50%,0)} }
+@keyframes toastOut { from{opacity:1} to{opacity:0} }
+
+.empty { text-align:center; padding:24px; color:var(--text-dim); font-size:8px; line-height:2; }
+
+/* Save indicator */
+.save-dot {
+  position:fixed;
+  bottom:calc(68px + var(--safe-bottom));
+  right:8px;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--green);
+  z-index:100;
+}
+.save-dot.saving { background:var(--gold); animation:sdPulse 0.4s infinite alternate; }
+@keyframes sdPulse { from{opacity:1} to{opacity:0.3} }
+
+/* Science principles */
+.principle {
+  background:#0d0d18;
+  border-left:3px solid var(--gold);
+  padding:8px;
+  margin-bottom:6px;
+}
+.principle-title { font-size:8px; color:var(--gold-light); margin-bottom:3px; }
+.principle-text { font-size:6px; color:var(--text-dim); line-height:1.5; font-family:'Courier New',monospace; }
+
+/* Custom exercise form */
+.custom-ex-form { margin-top:10px; padding-top:10px; border-top:1px solid #222; }
+
+/* Desktop tweaks */
+@media (min-width:769px) {
+  .main { max-width:500px; }
+  .bottom-nav { max-width:500px; left:50%; transform:translateX(-50%); border-left:2px solid var(--gold-dark); border-right:2px solid var(--gold-dark); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">IRON<span class="q">QUEST</span></div>
+  <div class="header-row">
+    <div class="h-stat"><div class="h-stat-val" id="hVol">0</div><div class="h-stat-lbl">TOTAL KG</div></div>
+    <div class="h-stat"><div class="h-stat-val" id="hWk">0</div><div class="h-stat-lbl">WORKOUTS</div></div>
+    <div class="h-stat"><div class="h-stat-val" id="hStreak">0d</div><div class="h-stat-lbl">STREAK</div></div>
+    <div class="h-stat"><div id="hRank"></div><div class="h-stat-lbl">RANK</div></div>
+  </div>
+  <div class="player-xp">
+    <span class="player-lvl" id="pLvl">LV1</span>
+    <div class="xp-track"><div class="xp-fill" id="pXpFill" style="width:0%"></div><div class="xp-label" id="pXpLbl">0/100</div></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page active" id="p-map"><div id="muscleGrid" class="muscle-grid"></div></div>
+  <div class="page" id="p-log"></div>
+  <div class="page" id="p-hist"></div>
+  <div class="page" id="p-stats"></div>
+  <div class="page" id="p-tools"></div>
+  <div class="page" id="p-guide"></div>
+  <div class="page" id="p-data"></div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bnav-btn active" data-p="map" onclick="nav('map',this)"><span class="bnav-icon">⚔</span>MAP</button>
+  <button class="bnav-btn" data-p="log" onclick="nav('log',this)"><span class="bnav-icon">✎</span>LOG</button>
+  <button class="bnav-btn" data-p="hist" onclick="nav('hist',this)"><span class="bnav-icon">☰</span>HIST</button>
+  <button class="bnav-btn" data-p="stats" onclick="nav('stats',this)"><span class="bnav-icon">◈</span>STATS</button>
+  <button class="bnav-btn" data-p="tools" onclick="nav('tools',this)"><span class="bnav-icon">⚙</span>TOOLS</button>
+  <button class="bnav-btn" data-p="guide" onclick="nav('guide',this)"><span class="bnav-icon">📖</span>GUIDE</button>
+  <button class="bnav-btn" data-p="data" onclick="nav('data',this)"><span class="bnav-icon">💾</span>DATA</button>
+</div>
+
+<div id="modalBox"></div>
+<div class="save-dot" id="saveDot"></div>
+
+<script>
+// ========== MUSCLE & EXERCISE DATA ==========
+const M = {
+  chest:{n:'Chest',i:'🫁',c:'#e04040'},
+  back:{n:'Back',i:'🦴',c:'#3090e0'},
+  shoulders:{n:'Shoulders',i:'🔺',c:'#e08020'},
+  biceps:{n:'Biceps',i:'💪',c:'#30b060'},
+  triceps:{n:'Triceps',i:'🦾',c:'#40c070'},
+  quads:{n:'Quads',i:'🦵',c:'#9050c0'},
+  hamstrings:{n:'Hamstrings',i:'🦿',c:'#8040b0'},
+  glutes:{n:'Glutes',i:'🍑',c:'#e04090'},
+  calves:{n:'Calves',i:'🦶',c:'#00c0c0'},
+  abs:{n:'Abs',i:'🧱',c:'#e0c040'},
+  forearms:{n:'Forearms',i:'🤛',c:'#6050e0'},
+  traps:{n:'Traps',i:'🔼',c:'#d05000'},
+};
+
+const EX = {
+  chest:[
+    {name:'Barbell Bench Press',type:'compound',cross:{shoulders:0.3,triceps:0.4},opt:true,rep:'6-10',
+     guide:'Highest pec EMG among pressing movements (Lauver 2016). Full ROM to chest, controlled 2-3s eccentric for stretch-mediated hypertrophy (Pedrosa 2023). Moderate grip (1.5x biacromial width). 3-4 sets, RIR 1-3.',
+     sci:'Optimal volume: 12-20 sets/wk. 2x/wk frequency superior to 1x (Schoenfeld 2015). All rep ranges 6-30 produce similar hypertrophy near failure (Schoenfeld 2021).'},
+    {name:'Incline Dumbbell Press',type:'compound',cross:{shoulders:0.35,triceps:0.3},opt:true,rep:'8-12',
+     guide:'30-45 degree incline increases clavicular (upper) pec activation vs flat (Trebs 2010). DBs allow greater ROM & stretch at bottom — lengthened partials match or exceed full ROM for growth (Pedrosa 2023). Let DBs descend deep.',
+     sci:'Combining flat + incline pressing ensures full pec development. Clavicular head requires direct incline work (Rodriguez-Ridao 2020).'},
+    {name:'Dips (Chest)',type:'compound',cross:{triceps:0.4,shoulders:0.2},rep:'8-15',
+     guide:'Forward lean 15-20deg shifts emphasis to sternal pec. Excellent loaded stretch at bottom. Stretch under load = potent hypertrophy stimulus (Warneke 2023). Add weight once 12+ BW reps.',
+     sci:'Stretch-mediated hypertrophy: exercises loading muscle in lengthened position produce superior growth (Maeo 2022).'},
+    {name:'Cable Flyes',type:'isolation',cross:{},rep:'12-15',
+     guide:'Constant tension throughout full ROM unlike DBs. High pec activation with reduced tricep involvement (Solstad 2020). Cross-body cables give peak tension at full adduction. RIR 1-2.',
+     sci:'Isolation allows targeted volume without excess systemic fatigue — important near upper weekly volume limits (Helms 2014).'},
+    {name:'Dumbbell Flyes',type:'isolation',cross:{},rep:'10-15',
+     guide:'Maximal pec stretch at bottom — where most muscle damage & mechanical tension occur (Nosaka 2001). Slight elbow bend 15-20deg. Control eccentric 3-4s. Focus on stretch.',
+     sci:'Eccentric-focused training & stretched-position exercises produce greater hypertrophy (Schoenfeld 2017).'},
+    {name:'Machine Chest Press',type:'compound',cross:{triceps:0.3,shoulders:0.2},rep:'8-12',
+     guide:'Fixed path = safe training to true failure without spotter. Machines produce comparable hypertrophy to free weights when volume matched (Schwanbeck 2020). Ideal for high-effort RIR 0-1 sets.',
+     sci:'Machines may be superior for safely training to failure (Schwanbeck 2020).'},
+    {name:'Pec Deck',type:'isolation',cross:{},rep:'12-15',
+     guide:'High pec EMG with minimal delt/tricep involvement (Solstad 2020). Mind-muscle connection enhances hypertrophy for isolation (Schoenfeld 2018). 1-2s squeeze at peak.',
+     sci:'Internal focus increases target muscle activation for isolation at moderate loads (Calatayud 2016).'},
+  ],
+  back:[
+    {name:'Barbell Row',type:'compound',cross:{biceps:0.3,forearms:0.2,traps:0.2},opt:true,rep:'6-10',
+     guide:'High lat, rhomboid, mid-trap EMG (Fenwick 2009). 30-45deg torso angle. Pull to lower chest = lats; upper abs = mid-traps. Use straps if grip limits back loading.',
+     sci:'Optimal back volume: 12-20 sets/wk across vertical + horizontal pulls. Back recovers fast — 2-3x/wk frequency.'},
+    {name:'Pull-Ups',type:'compound',cross:{biceps:0.35,forearms:0.2},opt:true,rep:'6-12',
+     guide:'Highest lat activation among vertical pulls (Youdas 2010). Full dead-hang to chin-over-bar. Lat fibers maximally stretched at bottom. Add weight via belt.',
+     sci:'Lat has greatest moment arm when shoulder fully flexed (overhead). Bottom of pull-up = lengthened position = superior for hypertrophy (Maeo 2022).'},
+    {name:'Lat Pulldown',type:'compound',cross:{biceps:0.3},rep:'8-12',
+     guide:'Comparable lat activation to pull-ups with easier load control (Hewit 2018). Wide grip = more lat stretch; close supinated = more bicep + ROM. NO behind-the-neck. Lean back 10-15deg.',
+     sci:'Vary grips across sessions. Both wide and close are effective (Lusk 2010).'},
+    {name:'Seated Cable Row',type:'compound',cross:{biceps:0.25,forearms:0.15,traps:0.15},rep:'8-12',
+     guide:'Horizontal pull for mid-back thickness (rhomboids, mid/lower traps). Allow scapulae to protract forward at start for full stretch. Retract + depress during pull.',
+     sci:'Vertical + horizontal pulls together ensure complete back development across different lat portions (Lehman 2004).'},
+    {name:'Deadlift',type:'compound',cross:{hamstrings:0.4,glutes:0.4,forearms:0.3,traps:0.3},rep:'3-6',
+     guide:'Highest whole-body activation (Martin-Fuentes 2020). Primarily hip extensors + erectors isometrically. Better as posterior chain exercise than direct lat builder. 3-5 sets.',
+     sci:'High systemic fatigue relative to per-muscle hypertrophy stimulus. Rows/pulldowns more efficient for back-specific growth (Schoenfeld 2010).'},
+    {name:'Face Pulls',type:'isolation',cross:{shoulders:0.3,traps:0.2},rep:'15-20',
+     guide:'Posterior delt, infraspinatus, lower traps — critical for shoulder health. External rotation at top activates rotator cuff. Reduces shoulder injury risk in pressing programs (Kolber 2014).',
+     sci:'2:1 or 3:2 pull-to-push ratio recommended for long-term shoulder health (Kolber 2014).'},
+  ],
+  shoulders:[
+    {name:'Overhead Press',type:'compound',cross:{triceps:0.35,traps:0.2},opt:true,rep:'6-10',
+     guide:'Highest anterior delt activation (Saeterbakken 2013). Standing version +25% core activation vs seated. Full ROM clavicle to lockout. Strict form over weight.',
+     sci:'Anterior delt gets significant crossover from bench press — may need fewer direct sets (6-8 direct + indirect).'},
+    {name:'Lateral Raises',type:'isolation',cross:{traps:0.15},opt:true,rep:'12-20',
+     guide:'THE key exercise for lateral delt — responsible for shoulder width. Cables provide more consistent tension (Botton 2013). Slight lean, lead with elbows. High volume works best. 4-5 sets.',
+     sci:'Lateral delts tolerate very high volume (20+ sets/wk) and high frequency. Get minimal crossover from pressing — need direct isolation.'},
+    {name:'Rear Delt Flyes',type:'isolation',cross:{traps:0.15},rep:'15-20',
+     guide:'Often most underdeveloped delt head. Reverse pec deck = highest posterior delt EMG (Botton 2013). Focus on horizontal abduction — lift with rear delts not traps.',
+     sci:'Posterior delts are type I dominant — respond well to higher reps (15-25) and higher frequency (Campos 2002).'},
+    {name:'Arnold Press',type:'compound',cross:{triceps:0.25},rep:'8-12',
+     guide:'Rotation engages all 3 delt heads sequentially. Greater ROM than standard OHP. Greater total delt activation due to increased ROM (Saeterbakken 2013).',
+     sci:'Rotational component increases time under tension vs standard DB press.'},
+    {name:'Cable Lateral Raises',type:'isolation',cross:{},rep:'12-15',
+     guide:'Superior to DB laterals — resistance matches strength curve. Cross-body (behind back) cable maximizes stretched position. Peak resistance at peak activation.',
+     sci:'Stretched position emphasis aligns with stretch-mediated hypertrophy research (Pedrosa 2023).'},
+  ],
+  biceps:[
+    {name:'Barbell Curl',type:'isolation',cross:{forearms:0.2},opt:true,rep:'8-12',
+     guide:'Heaviest loading for biceps = maximum mechanical tension. EZ-bar reduces wrist strain without reducing bicep activation (Marcolin 2018). Strict form — no body english. Full ROM.',
+     sci:'Optimal biceps volume: 10-16 sets/wk (including indirect from pulling). 2-3x/wk frequency. Account for indirect from rows/pulldowns.'},
+    {name:'Incline Dumbbell Curl',type:'isolation',cross:{},opt:true,rep:'8-12',
+     guide:'45-60deg incline stretches long head — stretch-mediated hypertrophy is potent (Pedrosa 2023). Arms hang fully behind torso. Control eccentric 3s. BEST exercise for long head (outer bicep).',
+     sci:'Combining incline curls (long head via shoulder extension) with preacher curls (short head via shoulder flexion) = complete bicep development.'},
+    {name:'Hammer Curl',type:'isolation',cross:{forearms:0.35},rep:'10-12',
+     guide:'Targets brachialis & brachioradialis — arm thickness/width. Brachialis sits under bicep, pushes it up when developed. Neutral grip.',
+     sci:'Brachialis best targeted with neutral (hammer) and pronated (reverse) grips where biceps brachii is mechanically disadvantaged (Kleiber 2015).'},
+    {name:'Preacher Curl',type:'isolation',cross:{},rep:'10-12',
+     guide:'Pad eliminates momentum. Shoulder flexion emphasizes short head. Highest short head activation (Oliveira 2009). Full extension at bottom — stretched position = most growth stimulus.',
+     sci:'Short head via shoulder flexion. Combine with incline curls (long head via extension) for complete development.'},
+    {name:'Concentration Curl',type:'isolation',cross:{},rep:'10-15',
+     guide:'Highest bicep EMG of any curl variation (ACE research). Braced position eliminates anterior delt assistance. Complete isolation. Excellent for peak contraction.',
+     sci:'Fixed elbow position eliminates compensatory recruitment (ACE study).'},
+  ],
+  triceps:[
+    {name:'Close-Grip Bench Press',type:'compound',cross:{chest:0.3,shoulders:0.15},opt:true,rep:'6-10',
+     guide:'Highest tricep loading potential — heaviest absolute weight. Hands shoulder-width, elbows tucked. Triceps most active in top half of press (Barnett 1995). Full ROM.',
+     sci:'Optimal triceps: 10-16 sets/wk including indirect from pressing.'},
+    {name:'Overhead Tricep Extension',type:'isolation',cross:{},opt:true,rep:'10-15',
+     guide:'THE most important triceps exercise. Overhead stretches long head (50% of tricep mass). Produced 40% more growth than pushdowns (Maeo 2023). Cable preferred. Full stretch at bottom is CRITICAL.',
+     sci:'Maeo 2023: overhead extensions >> pushdowns for long head hypertrophy. Aligns with stretch-mediated hypertrophy research (Pedrosa 2023).'},
+    {name:'Tricep Pushdown',type:'isolation',cross:{},rep:'10-15',
+     guide:'Targets lateral + medial heads. Rope allows wrist pronation at bottom. Lock elbows at sides. Full extension + 1-2s squeeze. Good complement to overhead work.',
+     sci:'Pushdowns = lateral head; overhead = long head (Maeo 2023). Include both patterns.'},
+    {name:'Skull Crushers',type:'isolation',cross:{},rep:'8-12',
+     guide:'Moderate long head stretch. Lower behind head for more stretch. EZ-bar reduces wrist strain. Control eccentric to protect elbows.',
+     sci:'Shoulder flexion degree determines long head stretch. Behind-head lowering > forehead lowering.'},
+    {name:'Dips (Tricep)',type:'compound',cross:{chest:0.25,shoulders:0.15},rep:'8-12',
+     guide:'Upright torso = tricep emphasis. Heavy loading possible (BW + added weight). Excellent stretch at bottom. 90deg elbow flexion minimum.',
+     sci:'Heavy compound tricep work builds overall mass; isolation targets specific heads.'},
+  ],
+  quads:[
+    {name:'Barbell Squat',type:'compound',cross:{glutes:0.5,hamstrings:0.2,abs:0.15},opt:true,rep:'5-10',
+     guide:'Highest whole-body activation after deadlifts (Clark 2012). Full depth minimum parallel — deeper squats = more quad AND glute growth (Kubo 2019). High bar + upright torso = more quad. Controlled eccentric 2-3s.',
+     sci:'Deep squats produce ~7% more quad growth than half squats at same load (Kubo 2019). 12-20 sets/wk optimal. 2x/wk frequency.'},
+    {name:'Leg Press',type:'compound',cross:{glutes:0.3,hamstrings:0.15},rep:'8-15',
+     guide:'Heavy quad loading without spinal compression. Feet lower + closer = more quad. Full ROM — knees toward chest without lumbar flexion. Back stays on pad.',
+     sci:'Comparable quad hypertrophy to squats when volume-equated (Kubo 2019). Less systemic fatigue.'},
+    {name:'Leg Extension',type:'isolation',cross:{},opt:true,rep:'10-15',
+     guide:'Only true quad isolation — zero glute/hamstring. Similar or greater rectus femoris growth than squats (Maeo 2022). Rectus femoris only fully shortened during knee extension without hip flexion. Hold peak 1-2s.',
+     sci:'Safe for healthy knees with controlled tempo (Escamilla 2001). Essential for complete quad development — rectus femoris undertrained by squats alone.'},
+    {name:'Bulgarian Split Squat',type:'compound',cross:{glutes:0.4,hamstrings:0.15},rep:'8-12',
+     guide:'Gold-standard unilateral. Eliminates bilateral deficit. Deep knee flexion = excellent quad stretch. High stability demand increases glute medius activation. 3 sets per leg.',
+     sci:'Similar hypertrophy to bilateral with lower spinal load (Speirs 2016). Corrects L-R imbalances.'},
+    {name:'Hack Squat',type:'compound',cross:{glutes:0.25},rep:'8-12',
+     guide:'Fixed path removes balance as limiter — pure quad focus. Full depth. Excellent for pushing to true failure safely.',
+     sci:'Machine squats allow closer-to-failure training since balance/stabilization not limiting (Schoenfeld 2021).'},
+  ],
+  hamstrings:[
+    {name:'Romanian Deadlift',type:'compound',cross:{glutes:0.4,back:0.15,forearms:0.15},opt:true,rep:'8-12',
+     guide:'Best hamstring exercise in lengthened position — most hypertrophy-producing position (Maeo 2022). Hinge at hips, soft knees, push hips back, feel deep stretch. Controlled eccentric 3-4s.',
+     sci:'Hamstrings need BOTH hip extension (RDL) AND knee flexion (curls) for complete development (Schoenfeld 2015). 10-16 sets/wk optimal.'},
+    {name:'Seated Leg Curl',type:'isolation',cross:{},opt:true,rep:'10-15',
+     guide:'Hip-flexed position = MORE stretched than lying curl. Seated curls produced more hamstring hypertrophy than lying (Maeo 2021). Full ROM, controlled tempo.',
+     sci:'Maeo 2021: seated > lying leg curls for hamstring growth — greater stretch in seated position. Consistent with stretch-mediated hypertrophy.'},
+    {name:'Lying Leg Curl',type:'isolation',cross:{},rep:'10-15',
+     guide:'Knee flexion pattern complementary to RDLs. Lying position pre-stretches hamstrings. Control eccentric 3s. Plantar flex toes to reduce calf contribution.',
+     sci:'Short head of biceps femoris ONLY crosses the knee — cannot be trained with hip extension (Schoenfeld 2015). Curls are essential.'},
+    {name:'Nordic Hamstring Curl',type:'isolation',cross:{},rep:'3-8',
+     guide:'Gold standard for eccentric hamstring training. Reduces hamstring injury risk by 51% (van der Horst 2015). Extremely high eccentric forces. Control descent — catch with hands. Start with negatives only.',
+     sci:'Develops fascicle length — key protective factor against hamstring strains (van der Horst 2015). Most evidence-supported injury prevention exercise.'},
+  ],
+  glutes:[
+    {name:'Hip Thrust',type:'compound',cross:{hamstrings:0.2},opt:true,rep:'8-12',
+     guide:'HIGHEST glute max EMG of any exercise — significantly higher than squats (Contreras 2015). Full hip extension + hard 2s squeeze at top. Posterior pelvic tilt at lockout.',
+     sci:'Combine hip thrusts (peak tension shortened) with squats/RDLs (peak tension lengthened) for complete glute stimulation. 12-20 sets/wk. 2-3x/wk.'},
+    {name:'Glute Bridge',type:'compound',cross:{hamstrings:0.15},rep:'12-15',
+     guide:'Simpler setup than hip thrust. Single-leg version excellent for imbalances. Posterior pelvic tilt at top is key. Great activation exercise pre-workout.',
+     sci:'Single-leg bridges = similar EMG to hip thrusts for working limb (Contreras 2015).'},
+    {name:'Cable Pull-Through',type:'compound',cross:{hamstrings:0.25},rep:'12-15',
+     guide:'Hip hinge with constant cable tension. No dead spots. Teaches proper hinge mechanics. No grip limitation unlike RDL. Stand facing away, rope between legs.',
+     sci:'Removes grip and spinal loading as limiters — more glute-focused training.'},
+    {name:'Step-Ups',type:'compound',cross:{quads:0.3},rep:'10-12',
+     guide:'Functional unilateral. Higher step (16-20in) = more glute. Drive through heel of working leg — avoid pushing off rear foot. Controlled descent.',
+     sci:'Activates gluteus medius more than bilateral exercises (McCurdy 2010) — important for hip stability.'},
+  ],
+  calves:[
+    {name:'Standing Calf Raise',type:'isolation',cross:{},opt:true,rep:'10-15',
+     guide:'Targets gastrocnemius (larger outer calf) with straight knee. Full stretch at bottom — pause 2s at bottom AND top. Slow eccentric 3-4s. Both heavy (6-8) and high rep (15-25) work.',
+     sci:'Calves are 60% type I fibers (Johnson 1973). Need high volume (16-20+ sets/wk), high frequency (4-6x/wk). Stretching between sets may enhance growth (Warneke 2023).'},
+    {name:'Seated Calf Raise',type:'isolation',cross:{},opt:true,rep:'12-20',
+     guide:'Targets soleus (60% of calf mass). Bent knee disengages gastrocnemius. Soleus is predominantly slow-twitch — higher reps 15-25 more effective. Full ROM with pauses.',
+     sci:'Soleus is 80% type I fibers — better with higher reps and total volume (Johnson 1973). Both standing + seated needed for complete development.'},
+    {name:'Donkey Calf Raise',type:'isolation',cross:{},rep:'12-15',
+     guide:'Hip-flexed position = deeper gastrocnemius stretch (biarticular muscle). Stretch under load enhances hypertrophy (Warneke 2023). Full ROM emphasis on deep stretch.',
+     sci:'Hip flexion increases gastroc stretch — potentially enhanced stretch-mediated hypertrophy.'},
+  ],
+  abs:[
+    {name:'Cable Crunch',type:'isolation',cross:{},opt:true,rep:'12-15',
+     guide:'Best for progressive overload on rectus abdominis. Curl ribcage toward pelvis (spinal flexion) — NOT hip hinge. Exhale fully at bottom. Keep hips stationary.',
+     sci:'Abs respond to progressive overload like any muscle. BW-only becomes insufficient past 20+ reps. Weighted exercises necessary for growth. 8-16 sets/wk.'},
+    {name:'Hanging Leg Raise',type:'isolation',cross:{},opt:true,rep:'10-15',
+     guide:'Large ROM with emphasis on lower rectus abdominis region. Key: posterior pelvic tilt — curl pelvis up toward ribcage, not just leg lift. Control descent 3-4s. No swinging.',
+     sci:'Bottom-up movements produce higher EMG in lower rectus region (Sarti 1996).'},
+    {name:'Ab Wheel Rollout',type:'compound',cross:{shoulders:0.1},rep:'8-15',
+     guide:'Highest rectus abdominis + oblique activation (Escamilla 2006). Anti-extension — resist spinal extension as you roll out. Full ROM. From knees intermediate; feet advanced.',
+     sci:'Anti-extension exercises produce high abdominal EMG — primary anatomical function of rectus abdominis (Escamilla 2006).'},
+    {name:'Pallof Press',type:'isolation',cross:{},rep:'10-12',
+     guide:'Gold-standard anti-rotation for obliques + transverse abdominis. Cable at chest height, stand sideways, press and resist rotation. Core bracing under load — transfers to compounds.',
+     sci:'Anti-rotation develops obliques and deep core for rotational stability (McGill 2010).'},
+  ],
+  forearms:[
+    {name:'Wrist Curl',type:'isolation',cross:{},opt:true,rep:'15-20',
+     guide:'Wrist flexors (anterior forearm). Let bar roll to fingertips for extra ROM. Seated, forearms on thighs. Higher reps due to fiber composition.',
+     sci:'Direct forearm training needed for hypertrophy beyond what grip exercises provide. Higher reps (15-25) may be optimal — high type I fiber proportion.'},
+    {name:'Farmer\'s Walk',type:'compound',cross:{traps:0.3,abs:0.15},opt:true,rep:'30-60s',
+     guide:'Single best exercise for functional grip strength. Heavy DBs, walk with posture. Challenges forearm flexors isometrically at high loads for time. Also trains traps + core.',
+     sci:'Grip strength is a strong predictor of overall health and longevity (Leong 2015).'},
+    {name:'Reverse Wrist Curl',type:'isolation',cross:{},rep:'15-20',
+     guide:'Wrist extensors (posterior forearm). Essential for balance and preventing overuse injuries. Light weight, high reps. Pronated grip, forearms on thighs.',
+     sci:'Balanced flexor/extensor training reduces repetitive strain injury risk.'},
+  ],
+  traps:[
+    {name:'Barbell Shrug',type:'isolation',cross:{forearms:0.15},opt:true,rep:'10-15',
+     guide:'Direct upper trap isolation via scapular elevation. Heavy loading effective. Squeeze + hold at top 2-3s. No head rolling. Use straps for heavy sets.',
+     sci:'Upper traps get indirect from deadlifts, OHP, lateral raises, rows. 6-10 direct sets/wk sufficient with indirect volume.'},
+    {name:'Rack Pulls',type:'compound',cross:{back:0.3,forearms:0.2,hamstrings:0.15},opt:true,rep:'5-8',
+     guide:'Partial deadlift from knee height — overloads lockout where traps/upper back most active. Supramaximal loads possible. Great for trap + grip development.',
+     sci:'Supramaximal isometric trap contraction creates novel overload stimulus.'},
+    {name:'Dumbbell Shrug',type:'isolation',cross:{forearms:0.1},rep:'12-15',
+     guide:'Greater ROM than barbell — handles at sides not in front. Slight scapular retraction at top adds mid-trap emphasis. Can be seated for stricter form.',
+     sci:'Greater ROM may contribute to more hypertrophy per set.'},
+  ],
+};
+
+const VOL_REC = {
+  chest:{min:10,opt:16,max:22},back:{min:10,opt:16,max:22},shoulders:{min:8,opt:14,max:22},
+  biceps:{min:6,opt:12,max:18},triceps:{min:6,opt:12,max:18},quads:{min:8,opt:14,max:20},
+  hamstrings:{min:6,opt:12,max:18},glutes:{min:6,opt:12,max:20},calves:{min:10,opt:16,max:24},
+  abs:{min:6,opt:12,max:18},forearms:{min:4,opt:8,max:14},traps:{min:4,opt:8,max:14},
+};
+
+// ========== RANK SYSTEM ==========
+const RANKS = [
+  {name:'RECRUIT',   min:1,  cls:'rank-recruit',   title:'Recruit'},
+  {name:'BRONZE',    min:5,  cls:'rank-bronze',     title:'Bronze'},
+  {name:'SILVER',    min:10, cls:'rank-silver',     title:'Silver'},
+  {name:'GOLD',      min:15, cls:'rank-gold',       title:'Gold'},
+  {name:'PLATINUM',  min:20, cls:'rank-platinum',   title:'Platinum'},
+  {name:'DIAMOND',   min:25, cls:'rank-diamond',    title:'Diamond'},
+  {name:'MASTER',    min:35, cls:'rank-master',     title:'Master'},
+  {name:'LEGEND',    min:50, cls:'rank-legend',     title:'Legend'},
+  {name:'MYTHIC',    min:75, cls:'rank-mythic',     title:'Mythic'},
+];
+
+function getRank(level) {
+  let r = RANKS[0];
+  for (const rank of RANKS) { if (level >= rank.min) r = rank; }
+  return r;
+}
+function rankBadge(level) {
+  const r = getRank(level);
+  return `<span class="rank-badge ${r.cls}">${r.name}</span>`;
+}
+
+// XP
+const XP_SET=10, XP_REP=2, XP_KG=0.1, XP_COMP=1.2;
+function xpNeeded(lv) { return Math.floor(100 * Math.pow(1.35, lv-1)); }
+function calcXP(w,r,comp) { let x=XP_SET+(r*XP_REP)+Math.floor(w*XP_KG); if(comp)x=Math.floor(x*XP_COMP); return x; }
+
+// ========== STATE ==========
+let S = loadS();
+function defaultS() {
+  const mx={};
+  Object.keys(M).forEach(k=>mx[k]={xp:0,lv:1});
+  return {workouts:[],cur:[],mx,pxp:0,plv:1,meas:[],tpl:[],customEx:{}};
+}
+function loadS() {
+  try {
+    const s=JSON.parse(localStorage.getItem('iq'));
+    if(s&&s.workouts&&s.mx){
+      Object.keys(M).forEach(k=>{if(!s.mx[k])s.mx[k]={xp:0,lv:1};});
+      if(!s.pxp)s.pxp=0; if(!s.plv)s.plv=1;
+      if(!s.meas)s.meas=[]; if(!s.tpl)s.tpl=[];
+      if(!s.customEx)s.customEx={};
+      return s;
+    }
+  }catch(e){}
+  return defaultS();
+}
+function saveS() {
+  document.getElementById('saveDot').classList.add('saving');
+  localStorage.setItem('iq',JSON.stringify(S));
+  setTimeout(()=>document.getElementById('saveDot').classList.remove('saving'),300);
+}
+window.addEventListener('beforeunload',saveS);
+setInterval(saveS,30000);
+
+// Get all exercises for a muscle (built-in + custom)
+function getExercises(muscle) {
+  const builtIn = EX[muscle] || [];
+  const custom = (S.customEx[muscle] || []).map(e => ({...e, custom:true}));
+  return [...builtIn, ...custom];
+}
+
+// ========== NAV ==========
+function nav(p, btn) {
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-'+p).classList.add('active');
+  if(btn) btn.classList.add('active');
+  window.scrollTo(0,0);
+  if(p==='map') renderMap();
+  if(p==='log') renderLog();
+  if(p==='hist') renderHist('all');
+  if(p==='stats') renderStats();
+  if(p==='tools') renderTools();
+  if(p==='guide') renderGuide();
+  if(p==='data') renderData();
+}
+
+// ========== HEADER ==========
+function updHeader() {
+  const tv=S.workouts.reduce((s,w)=>s+w.sets.reduce((a,set)=>a+set.w*set.r,0),0);
+  document.getElementById('hVol').textContent=fmtN(tv);
+  document.getElementById('hWk').textContent=S.workouts.length;
+  document.getElementById('hStreak').textContent=calcStreak()+'d';
+  document.getElementById('hRank').innerHTML=rankBadge(S.plv);
+  document.getElementById('pLvl').textContent='LV'+S.plv;
+  const need=xpNeeded(S.plv);
+  const pct=Math.min(S.pxp/need*100,100);
+  document.getElementById('pXpFill').style.width=pct+'%';
+  document.getElementById('pXpLbl').textContent=S.pxp+'/'+need;
+}
+function calcStreak() {
+  if(!S.workouts.length) return 0;
+  const dates=[...new Set(S.workouts.map(w=>w.date))].sort().reverse();
+  const today=new Date().toISOString().split('T')[0];
+  let check=new Date(today), streak=0;
+  if(dates[0]!==today){check.setDate(check.getDate()-1);if(dates[0]!==check.toISOString().split('T')[0])return 0;}
+  for(let i=0;i<365;i++){const d=check.toISOString().split('T')[0];if(dates.includes(d)){streak++;check.setDate(check.getDate()-1);}else break;}
+  return streak;
+}
+
+// ========== MUSCLE MAP ==========
+function renderMap() {
+  const g=document.getElementById('muscleGrid');
+  g.innerHTML='';
+  Object.entries(M).forEach(([k,m])=>{
+    const d=S.mx[k], need=xpNeeded(d.lv), pct=Math.min(d.xp/need*100,100);
+    const wd=mPeriod(k,7);
+    const card=document.createElement('div');
+    card.className='muscle-card';
+    card.onclick=()=>showMuscleModal(k);
+    card.innerHTML=`
+      <span class="mi">${m.i}</span>
+      <div class="muscle-name">${m.n}</div>
+      <div class="muscle-rank-line"><span style="font-size:7px;color:var(--cyan)">LV${d.lv}</span> ${rankBadge(d.lv)}</div>
+      <div class="xp-bar"><div class="xp-bar-fill" style="width:${pct}%;background:${m.c}"></div><div class="xp-bar-text">${d.xp}/${need}</div></div>
+      <div class="muscle-stats">
+        <div class="ms-item"><div class="ms-val">${fmtN(wd.vol)}</div><div class="ms-lbl">VOL/WK</div></div>
+        <div class="ms-item"><div class="ms-val">${wd.sets}</div><div class="ms-lbl">SETS/WK</div></div>
+      </div>`;
+    g.appendChild(card);
+  });
+}
+
+function mPeriod(k,days){
+  const c=new Date();c.setDate(c.getDate()-days);
+  let vol=0,sets=0;
+  S.workouts.forEach(w=>{if(new Date(w.date)>=c)w.sets.forEach(s=>{if(s.m===k){vol+=s.w*s.r;sets++;}});});
+  return{vol,sets};
+}
+function mPeriodRange(k,d1,d2){
+  const s1=new Date(),s2=new Date();s1.setDate(s1.getDate()-d2);s2.setDate(s2.getDate()-d1);
+  let vol=0,sets=0;
+  S.workouts.forEach(w=>{const d=new Date(w.date);if(d>=s1&&d<s2)w.sets.forEach(s=>{if(s.m===k){vol+=s.w*s.r;sets++;}});});
+  return{vol,sets};
+}
+function mTotal(k){let v=0;S.workouts.forEach(w=>w.sets.forEach(s=>{if(s.m===k)v+=s.w*s.r;}));return v;}
+
+// ========== MUSCLE MODAL ==========
+function showMuscleModal(k) {
+  const m=M[k],d=S.mx[k],need=xpNeeded(d.lv),pct=Math.min(d.xp/need*100,100);
+  const wd=mPeriod(k,7),md=mPeriod(k,30),all=mTotal(k);
+  const lw=mPeriodRange(k,7,14);
+  const olPct=lw.vol>0?((wd.vol-lw.vol)/lw.vol*100):(wd.vol>0?100:0);
+  let maxW=0,maxEx='';
+  S.workouts.forEach(w=>w.sets.forEach(s=>{if(s.m===k&&s.w>maxW){maxW=s.w;maxEx=s.ex;}}));
+  const recent=[];
+  [...S.workouts].reverse().forEach(w=>w.sets.forEach(s=>{if(s.m===k&&recent.length<8)recent.push({...s,date:w.date});}));
+  const rank=getRank(d.lv);
+  const nextRank=RANKS.find(r=>r.min>d.lv);
+
+  document.getElementById('modalBox').innerHTML=`
+  <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+    <div class="modal-sheet">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span class="mi" style="font-size:28px">${m.i}</span>
+        <div>
+          <div style="font-size:12px;color:var(--gold)">${m.n}</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:2px">
+            <span style="font-size:8px;color:var(--cyan)">LV${d.lv}</span>
+            ${rankBadge(d.lv)}
+          </div>
+        </div>
+      </div>
+      <div class="xp-bar" style="height:14px;margin-bottom:4px"><div class="xp-bar-fill" style="width:${pct}%;background:${m.c}"></div><div class="xp-bar-text" style="font-size:6px">${d.xp} / ${need} XP</div></div>
+      ${nextRank?`<div style="font-size:6px;color:var(--text-dim);margin-bottom:8px">Next rank: ${nextRank.name} at LV${nextRank.min}</div>`:'<div style="font-size:6px;color:var(--pink);margin-bottom:8px">MAX RANK ACHIEVED</div>'}
+
+      <div class="stats-grid" style="margin-bottom:8px">
+        <div class="stat-card"><div class="stat-val">${fmtN(wd.vol)}</div><div class="stat-lbl">WEEK</div></div>
+        <div class="stat-card"><div class="stat-val">${fmtN(md.vol)}</div><div class="stat-lbl">MONTH</div></div>
+        <div class="stat-card"><div class="stat-val">${fmtN(all)}</div><div class="stat-lbl">ALL TIME</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-val" style="color:${wd.sets>=10&&wd.sets<=20?'var(--green)':wd.sets>20?'var(--red)':'var(--gold)'}">${wd.sets}</div><div class="stat-lbl">SETS/WK</div></div>
+        <div class="stat-card"><div class="stat-val">${maxW}kg</div><div class="stat-lbl">BEST LIFT</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:${olPct>0?'var(--green)':olPct<0?'var(--red)':'var(--text-dim)'}">${olPct>0?'+':''}${olPct.toFixed(0)}%</div><div class="stat-lbl">VS LAST WK</div></div>
+      </div>
+
+      ${recent.length?`
+      <div style="font-size:8px;color:var(--gold);margin:10px 0 6px">RECENT</div>
+      ${recent.map(s=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a2e;font-size:7px"><span style="color:var(--text-dim)">${s.date}</span><span>${s.ex}</span><span style="color:var(--gold-light)">${s.w}kg x${s.r}</span></div>`).join('')}
+      `:'<div class="empty">NO DATA YET</div>'}
+
+      <button class="btn btn-gold btn-block" style="margin-top:12px" onclick="closeModal()">CLOSE</button>
+    </div>
+  </div>`;
+}
+function closeModal(){document.getElementById('modalBox').innerHTML='';}
+
+// ========== LOG WORKOUT ==========
+function renderLog() {
+  const p=document.getElementById('p-log');
+  p.innerHTML=`
+    <div class="card">
+      <div class="card-title">⚔ LOG WORKOUT</div>
+      <div class="form-row"><div class="form-group"><div class="form-lbl">DATE</div><input type="date" class="form-input" id="lDate" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><div class="form-lbl">NAME</div><input type="text" class="form-input" id="lName" placeholder="Push Day..."></div></div>
+      <div class="form-row cols-1"><div class="form-group"><div class="form-lbl">TEMPLATE</div><select class="form-select" id="lTpl" onchange="loadTpl()"><option value="">-- none --</option>${S.tpl.map((t,i)=>`<option value="${i}">${t.name}</option>`).join('')}</select></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">+ ADD SET</div>
+      <div class="form-row"><div class="form-group"><div class="form-lbl">MUSCLE</div><select class="form-select" id="lMuscle" onchange="updExOpts()"><option value="">Select...</option>${Object.entries(M).map(([k,m])=>`<option value="${k}">${m.i} ${m.n}</option>`).join('')}</select></div><div class="form-group"><div class="form-lbl">EXERCISE</div><select class="form-select" id="lEx"><option value="">--</option></select></div></div>
+      <div class="form-row cols-3"><div class="form-group"><div class="form-lbl">KG</div><input type="number" class="form-input" id="lKg" inputmode="decimal" step="0.5" min="0"></div><div class="form-group"><div class="form-lbl">REPS</div><input type="number" class="form-input" id="lReps" inputmode="numeric" min="1"></div><div class="form-group"><div class="form-lbl">RIR</div><input type="number" class="form-input" id="lRIR" inputmode="numeric" min="0" max="10" value="2"></div></div>
+      <div id="lastHint" style="font-size:6px;color:var(--text-dim);margin:4px 0;display:none"></div>
+      <button class="btn btn-gold btn-block" onclick="addSet()" style="margin-top:6px">+ ADD SET</button>
+    </div>
+    <div id="curSetsCard" style="display:none">
+      <div class="card">
+        <div class="card-title">CURRENT SETS</div>
+        <div id="curSummary" style="font-size:7px;color:var(--text-dim);margin-bottom:6px"></div>
+        <div id="curSets"></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-gold" onclick="saveWorkout()">SAVE WORKOUT</button>
+          <button class="btn btn-cyan btn-sm" onclick="saveTpl()">SAVE TPL</button>
+          <button class="btn btn-red btn-sm" onclick="clearCur()">CLEAR</button>
+        </div>
+      </div>
+    </div>`;
+  renderCurSets();
+  // Add event listener for exercise change
+  document.getElementById('lEx').addEventListener('change', showLastHint);
+}
+
+function updExOpts() {
+  const mk=document.getElementById('lMuscle').value;
+  const sel=document.getElementById('lEx');
+  sel.innerHTML='<option value="">Select...</option>';
+  if(mk) {
+    getExercises(mk).forEach(ex=>{
+      const o=document.createElement('option');
+      o.value=ex.name;
+      o.textContent=ex.name+(ex.opt?' ★':'')+(ex.custom?' [C]':'');
+      sel.appendChild(o);
+    });
+    const co=document.createElement('option');
+    co.value='__custom__';
+    co.textContent='+ NEW CUSTOM EXERCISE';
+    sel.appendChild(co);
+  }
+  showLastHint();
+}
+
+function showLastHint() {
+  const mk=document.getElementById('lMuscle').value;
+  const ex=document.getElementById('lEx').value;
+  const hint=document.getElementById('lastHint');
+  if(!hint||!mk||!ex||ex==='__custom__'){if(hint)hint.style.display='none';return;}
+  for(let i=S.workouts.length-1;i>=0;i--){
+    const ms=S.workouts[i].sets.filter(s=>s.m===mk&&s.ex===ex);
+    if(ms.length){
+      hint.innerHTML='LAST ('+S.workouts[i].date+'): '+ms.map(s=>s.w+'kg x'+s.r).join(', ');
+      hint.style.display='block';
+      return;
+    }
+  }
+  hint.style.display='none';
+}
+
+function addSet() {
+  const mk=document.getElementById('lMuscle').value;
+  let ex=document.getElementById('lEx').value;
+  const w=parseFloat(document.getElementById('lKg').value)||0;
+  const r=parseInt(document.getElementById('lReps').value)||0;
+  const rir=parseInt(document.getElementById('lRIR').value)||0;
+  if(!mk||!ex){showToast('SELECT MUSCLE & EXERCISE');return;}
+  if(r<=0){showToast('ENTER REPS');return;}
+  if(ex==='__custom__'){
+    ex=prompt('Exercise name:');
+    if(!ex)return;
+    // Save custom exercise
+    if(!S.customEx[mk])S.customEx[mk]=[];
+    if(!S.customEx[mk].find(e=>e.name===ex)){
+      const type=confirm('Is this a COMPOUND exercise?\n(OK=Compound, Cancel=Isolation)')?'compound':'isolation';
+      S.customEx[mk].push({name:ex,type,cross:{},rep:'8-12',guide:'Custom exercise.',sci:''});
+      saveS();
+    }
+  }
+  const allEx=getExercises(mk);
+  const exData=allEx.find(e=>e.name===ex);
+  const comp=exData?.type==='compound';
+  const xp=calcXP(w,r,comp);
+  S.cur.push({m:mk,ex,w,r,rir,vol:w*r,xp,cross:exData?.cross||{}});
+  saveS();
+  renderCurSets();
+  document.getElementById('lReps').value='';
+  document.getElementById('lReps').focus();
+}
+
+function renderCurSets() {
+  const card=document.getElementById('curSetsCard');
+  const list=document.getElementById('curSets');
+  if(!card||!list)return;
+  if(!S.cur.length){card.style.display='none';return;}
+  card.style.display='block';
+  const tv=S.cur.reduce((s,x)=>s+x.vol,0);
+  const tx=S.cur.reduce((s,x)=>s+x.xp,0);
+  const ms=[...new Set(S.cur.map(s=>s.m))];
+  document.getElementById('curSummary').innerHTML=`VOL: <b style="color:var(--gold-light)">${fmtN(tv)}kg</b> | SETS: <b style="color:var(--gold-light)">${S.cur.length}</b> | XP: <b style="color:var(--green)">+${tx}</b> | ${ms.map(m=>M[m]?.i||'').join(' ')}`;
+  list.innerHTML=S.cur.map((s,i)=>`<div class="set-entry"><span class="set-num">${i+1}</span><span>${M[s.m]?.i||''}</span><span class="set-info"><b>${s.ex}</b> ${s.w}kg x${s.r} R${s.rir}</span><span class="set-vol">${fmtN(s.vol)}</span><span class="set-xp">+${s.xp}</span><button class="set-del" onclick="rmSet(${i})">&times;</button></div>`).join('');
+}
+function rmSet(i){S.cur.splice(i,1);saveS();renderCurSets();}
+function clearCur(){if(confirm('CLEAR ALL SETS?')){S.cur=[];saveS();renderCurSets();}}
+
+function saveWorkout() {
+  if(!S.cur.length){showToast('NO SETS');return;}
+  const date=document.getElementById('lDate').value;
+  const name=document.getElementById('lName').value||'WORKOUT';
+  const wo={id:Date.now(),date,name,sets:[...S.cur]};
+  S.workouts.push(wo);
+  let totalXP=0;const mxg={};
+  wo.sets.forEach(s=>{
+    totalXP+=s.xp;
+    mxg[s.m]=(mxg[s.m]||0)+s.xp;
+    Object.entries(s.cross).forEach(([m2,ratio])=>{mxg[m2]=(mxg[m2]||0)+Math.floor(s.xp*ratio*0.5);});
+  });
+  const lvlups=[];
+  Object.entries(mxg).forEach(([m,xp])=>{
+    S.mx[m].xp+=xp;
+    while(S.mx[m].xp>=xpNeeded(S.mx[m].lv)){S.mx[m].xp-=xpNeeded(S.mx[m].lv);S.mx[m].lv++;lvlups.push({m,lv:S.mx[m].lv});}
+  });
+  S.pxp+=totalXP;
+  while(S.pxp>=xpNeeded(S.plv)){S.pxp-=xpNeeded(S.plv);S.plv++;}
+  S.cur=[];saveS();renderCurSets();updHeader();
+  showXPPop(totalXP);
+  if(lvlups.length) setTimeout(()=>showLvlUp(lvlups[0]),1500);
+  showToast('WORKOUT SAVED! +'+totalXP+' XP');
+}
+
+function showXPPop(xp){const el=document.createElement('div');el.className='xp-popup';el.textContent='+'+xp+' XP';document.body.appendChild(el);setTimeout(()=>el.remove(),1500);}
+function showLvlUp(d){
+  const rank=getRank(d.lv);
+  const el=document.createElement('div');
+  el.className='lvlup-overlay';
+  el.onclick=()=>el.remove();
+  el.innerHTML=`<div class="lvlup-box"><div class="lvlup-title">★ LEVEL UP ★</div><div class="lvlup-muscle">${M[d.m].i} ${M[d.m].n}</div><div class="lvlup-level">LV ${d.lv}</div><div class="lvlup-rank">${rankBadge(d.lv)}</div><div class="lvlup-dismiss">[ TAP TO CONTINUE ]</div></div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{if(el.parentNode)el.remove();},5000);
+}
+
+// Templates
+function saveTpl(){
+  if(!S.cur.length){showToast('NO SETS');return;}
+  const name=prompt('TEMPLATE NAME:',document.getElementById('lName')?.value||'Template');
+  if(!name)return;
+  S.tpl.push({name,sets:S.cur.map(s=>({m:s.m,ex:s.ex,w:s.w,r:s.r,rir:s.rir})),created:new Date().toISOString()});
+  saveS();showToast('TEMPLATE SAVED');
+}
+function loadTpl(){
+  const idx=document.getElementById('lTpl')?.value;
+  if(idx==='')return;
+  const t=S.tpl[parseInt(idx)];if(!t)return;
+  if(S.cur.length&&!confirm('REPLACE CURRENT SETS?'))return;
+  S.cur=t.sets.map(s=>{const allEx=getExercises(s.m);const exD=allEx.find(e=>e.name===s.ex);const comp=exD?.type==='compound';const xp=calcXP(s.w,s.r,comp);return{...s,vol:s.w*s.r,xp,cross:exD?.cross||{}};});
+  document.getElementById('lName').value=t.name;
+  saveS();renderCurSets();showToast('TEMPLATE LOADED');
+}
+
+// ========== HISTORY ==========
+function renderHist(period) {
+  const p=document.getElementById('p-hist');
+  const wk=filterWk(period);
+  p.innerHTML=`
+    <div class="card"><div class="card-title">☰ HISTORY</div>
+    <div class="filters">
+      <button class="f-btn ${period==='all'?'active':''}" onclick="renderHist('all')">ALL</button>
+      <button class="f-btn ${period==='week'?'active':''}" onclick="renderHist('week')">WEEK</button>
+      <button class="f-btn ${period==='month'?'active':''}" onclick="renderHist('month')">MONTH</button>
+      <button class="f-btn ${period==='3m'?'active':''}" onclick="renderHist('3m')">3 MO</button>
+    </div></div>
+    ${wk.length?[...wk].reverse().map(w=>{
+      const tv=w.sets.reduce((s,x)=>s+x.w*x.r,0);
+      const tx=w.sets.reduce((s,x)=>s+x.xp,0);
+      const ms=[...new Set(w.sets.map(s=>s.m))];
+      return`<div class="workout-entry"><div class="workout-header"><span class="workout-name">${ms.map(m=>M[m]?.i||'').join('')} ${w.name}</span><div style="display:flex;gap:6px;align-items:center"><span class="workout-date">${w.date}</span><button class="workout-del" onclick="delWk(${w.id})">✕</button></div></div><div class="workout-meta">VOL: <b>${fmtN(tv)}kg</b> SETS: <b>${w.sets.length}</b> XP: <b style="color:var(--green)">+${tx}</b></div><div class="workout-sets">${w.sets.map((s,i)=>`<div class="workout-set-row"><span style="color:var(--cyan)">${i+1}</span><span>${M[s.m]?.i||''} ${s.ex}</span><span style="color:var(--gold-light)">${s.w}kg x${s.r}</span><span style="color:var(--gold)">${fmtN(s.vol)}</span></div>`).join('')}</div></div>`;
+    }).join(''):'<div class="empty">NO WORKOUTS YET<br>HIT THE IRON!</div>'}`;
+}
+function delWk(id){if(!confirm('DELETE WORKOUT?')){return;}S.workouts=S.workouts.filter(w=>w.id!==id);saveS();updHeader();renderHist('all');}
+function filterWk(p){if(p==='all')return S.workouts;const d=p==='week'?7:p==='month'?30:90;const c=new Date();c.setDate(c.getDate()-d);return S.workouts.filter(w=>new Date(w.date)>=c);}
+
+// ========== STATS ==========
+let sp='week';
+function renderStats() {
+  const p=document.getElementById('p-stats');
+  const wv=periodVol(7),mv=periodVol(30),tv=periodVol(99999),ws=periodSets(7);
+  const avgLv=(Object.values(S.mx).reduce((s,m)=>s+m.lv,0)/Object.keys(M).length).toFixed(1);
+  const days=sp==='week'?7:sp==='month'?30:sp==='3m'?90:99999;
+  const mVols={};let maxV=0;
+  Object.keys(M).forEach(k=>{const d=mPeriod(k,days);mVols[k]=d.vol;if(d.vol>maxV)maxV=d.vol;});
+
+  p.innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">${fmtN(wv)}</div><div class="stat-lbl">WEEK VOL</div></div>
+      <div class="stat-card"><div class="stat-val">${fmtN(mv)}</div><div class="stat-lbl">MONTH VOL</div></div>
+      <div class="stat-card"><div class="stat-val">${fmtN(tv)}</div><div class="stat-lbl">ALL TIME</div></div>
+      <div class="stat-card"><div class="stat-val">${ws}</div><div class="stat-lbl">SETS/WK</div></div>
+      <div class="stat-card"><div class="stat-val">${avgLv}</div><div class="stat-lbl">AVG LV</div></div>
+      <div class="stat-card"><div class="stat-val">${rankBadge(S.plv)}</div><div class="stat-lbl">RANK</div></div>
+    </div>
+    <div class="card"><div class="card-title">VOLUME BY MUSCLE</div>
+      <div class="filters">
+        <button class="f-btn ${sp==='week'?'active':''}" onclick="sp='week';renderStats()">WK</button>
+        <button class="f-btn ${sp==='month'?'active':''}" onclick="sp='month';renderStats()">MO</button>
+        <button class="f-btn ${sp==='3m'?'active':''}" onclick="sp='3m';renderStats()">3M</button>
+        <button class="f-btn ${sp==='all'?'active':''}" onclick="sp='all';renderStats()">ALL</button>
+      </div>
+      ${Object.entries(mVols).sort(([,a],[,b])=>b-a).map(([k,v])=>{const pct=maxV>0?v/maxV*100:0;return`<div class="vol-bar-group"><div class="vol-bar-top"><span>${M[k].i} ${M[k].n}</span><span style="color:var(--gold-light)">${fmtN(v)}kg</span></div><div class="vol-bar"><div class="vol-bar-fill" style="width:${pct}%;background:${M[k].c}"></div></div></div>`;}).join('')}
+    </div>
+    <div class="card"><div class="card-title">OVERLOAD TRACKER</div>
+      <div style="font-size:6px;color:var(--text-dim);margin-bottom:6px">THIS WEEK VS LAST WEEK</div>
+      ${Object.keys(M).map(k=>{const tw=mPeriod(k,7),lw=mPeriodRange(k,7,14);if(!tw.vol&&!lw.vol)return'';const pct=lw.vol>0?((tw.vol-lw.vol)/lw.vol*100):(tw.vol>0?100:0);const cls=pct>0?'ob-up':pct<0?'ob-down':'ob-same';const arr=pct>0?'▲':pct<0?'▼':'—';return`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #1a1a2e;font-size:7px"><span>${M[k].i} ${M[k].n}</span><span>${fmtN(lw.vol)} → ${fmtN(tw.vol)}</span><span class="overload-badge ${cls}">${arr} ${pct>0?'+':''}${pct.toFixed(0)}%</span></div>`;}).join('')||'<div style="font-size:7px;color:var(--text-dim)">NEED 2+ WEEKS DATA</div>'}
+    </div>
+    <div class="card"><div class="card-title">CROSSOVER LOAD</div>
+      <div style="font-size:6px;color:var(--text-dim);margin-bottom:6px">COMPOUND SPILLOVER THIS WEEK</div>
+      <div class="cross-grid">${renderCrossover()}</div>
+    </div>
+    <div class="card"><div class="card-title">SETS/WEEK</div>
+      <div style="font-size:6px;color:var(--text-dim);margin-bottom:6px">GREEN=10-20 OPTIMAL | RED=OVER 20</div>
+      ${Object.keys(M).map(k=>{const s=mPeriod(k,7).sets;const pct=Math.min(s/25*100,100);const col=s>=10&&s<=20?'var(--green)':s>20?'var(--red)':'var(--gold)';return`<div class="vol-bar-group"><div class="vol-bar-top"><span>${M[k].i} ${M[k].n}</span><span style="color:${col}">${s}</span></div><div class="vol-bar"><div class="vol-bar-fill" style="width:${pct}%;background:${col}"></div></div></div>`;}).join('')}
+    </div>`;
+}
+function renderCrossover(){
+  const cv={};Object.keys(M).forEach(k=>cv[k]=0);
+  const c=new Date();c.setDate(c.getDate()-7);
+  S.workouts.forEach(w=>{if(new Date(w.date)<c)return;w.sets.forEach(s=>{Object.entries(s.cross||{}).forEach(([m,r])=>{cv[m]=(cv[m]||0)+s.vol*r;});});});
+  return Object.entries(cv).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k,v])=>`<div class="cross-item"><div class="cross-lbl">${M[k]?.i} ${M[k]?.n}</div><div class="cross-val">${fmtN(v)}kg</div></div>`).join('')||'<div style="font-size:7px;color:var(--text-dim);grid-column:span 2">NO DATA</div>';
+}
+function periodVol(d){const c=new Date();c.setDate(c.getDate()-d);return S.workouts.reduce((s,w)=>new Date(w.date)>=c?s+w.sets.reduce((a,x)=>a+x.w*x.r,0):s,0);}
+function periodSets(d){const c=new Date();c.setDate(c.getDate()-d);return S.workouts.reduce((s,w)=>new Date(w.date)>=c?s+w.sets.length:s,0);}
+
+// ========== TOOLS ==========
+let timerI=null,timerS=90,timerOn=false,timerT=90;
+function renderTools() {
+  const p=document.getElementById('p-tools');
+  p.innerHTML=`
+    <div class="card"><div class="card-title">⏱ REST TIMER</div>
+      <div class="timer-presets">
+        ${[60,90,120,150,180,300].map(s=>`<button class="timer-pre ${timerT===s?'active':''}" onclick="setTm(${s})">${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}</button>`).join('')}
+      </div>
+      <div class="timer-display" id="tmDisp">${Math.floor(timerS/60)}:${String(timerS%60).padStart(2,'0')}</div>
+      <div class="btn-row" style="justify-content:center"><button class="btn btn-gold" id="tmBtn" onclick="toggleTm()">START</button><button class="btn btn-red btn-sm" onclick="resetTm()">RESET</button></div>
+    </div>
+    <div class="card"><div class="card-title">🔢 1RM CALCULATOR</div>
+      <div class="form-row"><div class="form-group"><div class="form-lbl">WEIGHT KG</div><input type="number" class="form-input" id="cW" inputmode="decimal" oninput="calc1RM()"></div><div class="form-group"><div class="form-lbl">REPS</div><input type="number" class="form-input" id="cR" inputmode="numeric" oninput="calc1RM()"></div></div>
+      <div style="text-align:center;margin:8px 0"><div style="font-size:7px;color:var(--text-dim)">ESTIMATED 1RM</div><div id="c1RM" style="font-size:24px;color:var(--gold);text-shadow:0 0 10px rgba(212,160,23,0.3)">—</div></div>
+      <div id="rmPcts"></div>
+    </div>
+    <div class="card"><div class="card-title">🏆 PR BOARD</div><div id="prGrid"></div></div>
+    <div class="card"><div class="card-title">📏 BODY MEASUREMENTS</div>
+      <div class="form-row cols-3"><div class="form-group"><div class="form-lbl">DATE</div><input type="date" class="form-input" id="mDate" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><div class="form-lbl">WEIGHT KG</div><input type="number" class="form-input" id="mW" inputmode="decimal" step="0.1"></div><div class="form-group"><div class="form-lbl">BF%</div><input type="number" class="form-input" id="mBF" inputmode="decimal" step="0.1"></div></div>
+      <div class="form-row"><div class="form-group"><div class="form-lbl">CHEST CM</div><input type="number" class="form-input" id="mChest" inputmode="decimal" step="0.5"></div><div class="form-group"><div class="form-lbl">ARMS CM</div><input type="number" class="form-input" id="mArms" inputmode="decimal" step="0.5"></div></div>
+      <div class="form-row"><div class="form-group"><div class="form-lbl">WAIST CM</div><input type="number" class="form-input" id="mWaist" inputmode="decimal" step="0.5"></div><div class="form-group"><div class="form-lbl">THIGHS CM</div><input type="number" class="form-input" id="mThighs" inputmode="decimal" step="0.5"></div></div>
+      <button class="btn btn-gold btn-block btn-sm" onclick="saveMeas()" style="margin-top:6px">SAVE</button>
+      <div id="measHist" style="margin-top:8px"></div>
+    </div>
+    <div class="card"><div class="card-title">📋 TEMPLATES</div><div id="tplList"></div></div>
+    <div class="card"><div class="card-title">🔧 CUSTOM EXERCISES</div>
+      <div style="font-size:7px;color:var(--text-dim);margin-bottom:8px">YOUR CUSTOM EXERCISES BY MUSCLE</div>
+      <div id="customExList"></div>
+      <button class="btn btn-cyan btn-block btn-sm" onclick="addCustomExercise()" style="margin-top:8px">+ ADD CUSTOM EXERCISE</button>
+    </div>`;
+  renderPRs();renderMeasHist();renderTpls();renderCustomExList();updTmDisp();
+}
+
+// Timer
+function setTm(s){timerT=s;timerS=s;timerOn=false;if(timerI){clearInterval(timerI);timerI=null;}const b=document.getElementById('tmBtn');if(b)b.textContent='START';updTmDisp();document.querySelectorAll('.timer-pre').forEach(b=>b.classList.toggle('active',parseInt(b.textContent.split(':')[0])*60+parseInt(b.textContent.split(':')[1])===s));}
+function toggleTm(){if(timerOn){clearInterval(timerI);timerOn=false;document.getElementById('tmBtn').textContent='RESUME';}else{timerOn=true;document.getElementById('tmBtn').textContent='PAUSE';timerI=setInterval(()=>{timerS--;if(timerS<=0){timerS=0;clearInterval(timerI);timerOn=false;document.getElementById('tmBtn').textContent='START';tmDone();}updTmDisp();},1000);}}
+function resetTm(){timerS=timerT;timerOn=false;if(timerI)clearInterval(timerI);timerI=null;const b=document.getElementById('tmBtn');if(b)b.textContent='START';updTmDisp();}
+function updTmDisp(){const el=document.getElementById('tmDisp');if(!el)return;el.textContent=Math.floor(timerS/60)+':'+String(timerS%60).padStart(2,'0');el.classList.toggle('warn',timerS<=5&&timerS>0);}
+function tmDone(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;o.type='square';g.gain.value=0.3;o.start();setTimeout(()=>{o.stop();c.close();},500);}catch(e){}showToast('⏰ REST OVER — GO!');}
+
+// 1RM
+function calc1RM(){const w=parseFloat(document.getElementById('cW')?.value);const r=parseInt(document.getElementById('cR')?.value);const res=document.getElementById('c1RM');const pcts=document.getElementById('rmPcts');if(!w||!r||r<1){if(res)res.textContent='—';if(pcts)pcts.innerHTML='';return;}const rm=r===1?w:Math.round(w*(1+r/30));if(res)res.textContent=rm+'kg';const ps=[100,95,90,85,80,75,70,65,60];const rr=['1','2','3','4-5','6-8','8-10','10-12','12-15','15-20'];if(pcts)pcts.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${ps.map((p,i)=>`<div style="background:#0d0d18;border:1px solid #1a1a2e;padding:6px;text-align:center"><div style="font-size:6px;color:var(--text-dim)">${p}%</div><div style="font-size:10px;color:var(--gold)">${Math.round(rm*p/100)}kg</div><div style="font-size:5px;color:var(--text-dim)">${rr[i]}r</div></div>`).join('')}</div>`;}
+
+// PRs
+function renderPRs(){const g=document.getElementById('prGrid');if(!g)return;const prs={};S.workouts.forEach(w=>w.sets.forEach(s=>{const k=s.ex;const e1=s.w*(1+s.r/30);if(!prs[k]||e1>prs[k].e1)prs[k]={ex:k,m:s.m,w:s.w,r:s.r,e1:Math.round(e1),date:w.date};}));const sorted=Object.values(prs).sort((a,b)=>b.e1-a.e1);if(!sorted.length){g.innerHTML='<div class="empty">NO PRS YET</div>';return;}g.innerHTML=sorted.slice(0,15).map((pr,i)=>`<div class="pr-card"><div class="pr-name">${M[pr.m]?.i||''} ${pr.ex}</div><div class="pr-val">${pr.w}kg x${pr.r}</div><div class="pr-detail">EST 1RM: ${pr.e1}kg | ${pr.date}</div>${i<3?`<div class="pr-medal">${['GOLD','SILVER','BRONZE'][i]}</div>`:''}</div>`).join('');}
+
+// Measurements
+function saveMeas(){const m={date:document.getElementById('mDate')?.value,weight:parseFloat(document.getElementById('mW')?.value)||null,bf:parseFloat(document.getElementById('mBF')?.value)||null,chest:parseFloat(document.getElementById('mChest')?.value)||null,arms:parseFloat(document.getElementById('mArms')?.value)||null,waist:parseFloat(document.getElementById('mWaist')?.value)||null,thighs:parseFloat(document.getElementById('mThighs')?.value)||null};if(!m.weight&&!m.bf&&!m.chest&&!m.arms&&!m.waist&&!m.thighs){showToast('ENTER A VALUE');return;}S.meas.push(m);S.meas.sort((a,b)=>a.date.localeCompare(b.date));saveS();renderMeasHist();showToast('SAVED');}
+function renderMeasHist(){const c=document.getElementById('measHist');if(!c)return;if(!S.meas.length){c.innerHTML='';return;}const l=S.meas[S.meas.length-1];const p=S.meas.length>1?S.meas[S.meas.length-2]:null;const fs=[{k:'weight',l:'WEIGHT',u:'kg'},{k:'bf',l:'BF',u:'%'},{k:'chest',l:'CHEST',u:'cm'},{k:'arms',l:'ARMS',u:'cm'},{k:'waist',l:'WAIST',u:'cm'},{k:'thighs',l:'THIGHS',u:'cm'}];c.innerHTML=`<div style="font-size:7px;color:var(--gold);margin-bottom:4px">LATEST: ${l.date}</div>${fs.map(f=>{if(!l[f.k])return'';let ch='';if(p&&p[f.k]){const d=l[f.k]-p[f.k];ch=`<span class="meas-change ${d>0?'mc-up':d<0?'mc-down':''}">${d>0?'+':''}${d.toFixed(1)}</span>`;}return`<div class="meas-row"><span class="meas-lbl">${f.l}</span><span>${ch}<span class="meas-val">${l[f.k]}${f.u}</span></span></div>`;}).join('')}<div style="font-size:6px;color:var(--text-dim);margin-top:4px">${S.meas.length} RECORDS</div>`;}
+
+// Templates
+function renderTpls(){const c=document.getElementById('tplList');if(!c)return;if(!S.tpl.length){c.innerHTML='<div style="font-size:7px;color:var(--text-dim)">NO TEMPLATES</div>';return;}c.innerHTML=S.tpl.map((t,i)=>{const ms=[...new Set(t.sets.map(s=>s.m))];return`<div class="tpl-card"><div><div class="tpl-name">${ms.map(m=>M[m]?.i||'').join('')} ${t.name}</div><div class="tpl-info">${t.sets.length} SETS</div></div><div class="tpl-actions"><button class="btn btn-gold btn-sm" onclick="loadTplIdx(${i})">USE</button><button class="btn btn-red btn-sm" onclick="delTpl(${i})">DEL</button></div></div>`;}).join('');}
+function loadTplIdx(i){const t=S.tpl[i];if(!t)return;S.cur=t.sets.map(s=>{const allEx=getExercises(s.m);const exD=allEx.find(e=>e.name===s.ex);const comp=exD?.type==='compound';const xp=calcXP(s.w,s.r,comp);return{...s,vol:s.w*s.r,xp,cross:exD?.cross||{}};});saveS();nav('log',document.querySelector('[data-p="log"]'));document.getElementById('lName').value=t.name;renderCurSets();showToast('TEMPLATE LOADED');}
+function delTpl(i){if(!confirm('DELETE?'))return;S.tpl.splice(i,1);saveS();renderTpls();}
+
+// Custom Exercises
+function renderCustomExList(){
+  const c=document.getElementById('customExList');
+  if(!c) return;
+  const entries=Object.entries(S.customEx).filter(([,exs])=>exs.length>0);
+  if(!entries.length){c.innerHTML='<div style="font-size:7px;color:var(--text-dim)">NO CUSTOM EXERCISES YET</div>';return;}
+  c.innerHTML=entries.map(([mk,exs])=>`
+    <div style="margin-bottom:8px">
+      <div style="font-size:8px;color:var(--gold);margin-bottom:4px">${M[mk]?.i||''} ${M[mk]?.n||mk}</div>
+      ${exs.map((ex,i)=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;background:#0d0d18;border:1px solid #1a1a2e;margin-bottom:2px;font-size:7px">
+          <span>${ex.name} <span style="color:var(--text-dim)">(${ex.type})</span></span>
+          <button class="btn btn-red btn-sm" style="padding:3px 6px;font-size:6px" onclick="delCustomEx('${mk}',${i})">DEL</button>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function addCustomExercise(){
+  const mk=prompt('MUSCLE GROUP:\n'+Object.entries(M).map(([k,m])=>k+' = '+m.n).join('\n'));
+  if(!mk||!M[mk]){showToast('INVALID MUSCLE');return;}
+  const name=prompt('EXERCISE NAME:');
+  if(!name)return;
+  const type=confirm('COMPOUND?\n(OK=Compound, Cancel=Isolation)')?'compound':'isolation';
+  const rep=prompt('REP RANGE (e.g. 8-12):','8-12')||'8-12';
+  const guide=prompt('NOTES (optional):','')||'Custom exercise.';
+  if(!S.customEx[mk])S.customEx[mk]=[];
+  if(S.customEx[mk].find(e=>e.name===name)){showToast('ALREADY EXISTS');return;}
+  S.customEx[mk].push({name,type,cross:{},rep,guide,sci:''});
+  saveS();
+  renderCustomExList();
+  showToast('EXERCISE ADDED: '+name);
+}
+
+function delCustomEx(mk,i){
+  if(!confirm('DELETE?'))return;
+  S.customEx[mk].splice(i,1);
+  if(!S.customEx[mk].length) delete S.customEx[mk];
+  saveS();
+  renderCustomExList();
+}
+
+// ========== GUIDE ==========
+function renderGuide() {
+  const p=document.getElementById('p-guide');
+  p.innerHTML=`
+    <div class="card"><div class="card-title">📖 SCIENCE PRINCIPLES</div>
+      <div class="principle" style="border-color:var(--gold)"><div class="principle-title">PROGRESSIVE OVERLOAD</div><div class="principle-text">#1 driver of growth. Systematically increase volume (sets x reps x weight) over time. (Schoenfeld 2017)</div></div>
+      <div class="principle" style="border-color:var(--cyan)"><div class="principle-title">PROXIMITY TO FAILURE (RIR 0-3)</div><div class="principle-text">Sets must be within ~3 reps of failure. Rep range 6-30 is irrelevant as long as sets approach failure. (Schoenfeld 2021)</div></div>
+      <div class="principle" style="border-color:var(--green)"><div class="principle-title">VOLUME: 10-20 SETS/WEEK</div><div class="principle-text">Dose-response up to ~20 sets with diminishing returns. Start low, increase gradually. (Schoenfeld & Krieger 2017)</div></div>
+      <div class="principle" style="border-color:var(--purple)"><div class="principle-title">FREQUENCY: 2X/WEEK MIN</div><div class="principle-text">2x/week > 1x at same volume. Higher (3-4x) may benefit advanced lifters. (Schoenfeld 2016)</div></div>
+      <div class="principle" style="border-color:var(--red)"><div class="principle-title">STRETCH-MEDIATED HYPERTROPHY</div><div class="principle-text">Exercises loading muscles in lengthened position = superior growth. Prioritize full ROM and stretch exercises. (Pedrosa 2023, Maeo 2022)</div></div>
+      <div class="principle" style="border-color:var(--bronze)"><div class="principle-title">ECCENTRIC CONTROL (2-4S)</div><div class="principle-text">Controlled lowering produces more hypertrophy. 2-4s negatives sufficient. (Schoenfeld 2017)</div></div>
+    </div>
+    <div class="card"><div class="card-title">EXERCISE ENCYCLOPEDIA</div>
+    ${Object.entries(EX).map(([mk,exs])=>{
+      const m=M[mk];const vr=VOL_REC[mk];
+      const customs=S.customEx[mk]||[];
+      const allExs=[...exs,...customs.map(e=>({...e,custom:true}))];
+      return`<div class="guide-card" onclick="this.classList.toggle('open')">
+        <div class="guide-head"><span class="mi">${m.i}</span><span class="guide-muscle-name">${m.n}</span><span class="guide-count">${allExs.length} EX</span></div>
+        <div class="guide-body">
+          ${vr?`<div class="vol-rec"><div class="vol-rec-title">EVIDENCE-BASED VOLUME (SETS/WK)</div><div class="vol-rec-nums"><span style="color:var(--text-dim)">MIN: <b style="color:var(--text)">${vr.min}</b></span><span style="color:var(--text-dim)">OPT: <b style="color:var(--green)">${vr.opt}</b></span><span style="color:var(--text-dim)">MAX: <b style="color:var(--red)">${vr.max}</b></span></div></div>`:''}
+          ${allExs.map(ex=>`<div class="guide-exercise"><div class="guide-ex-name">${ex.name}${ex.custom?' [CUSTOM]':''}</div><div class="guide-ex-text">${ex.guide}</div>${ex.sci?`<div class="guide-sci">${ex.sci}</div>`:''}
+            <div class="guide-tags"><span class="tag ${ex.type==='compound'?'tag-c':'tag-i'}">${ex.type}</span>${ex.opt?'<span class="tag tag-o">OPTIMAL</span>':''}<span class="tag tag-rep">${ex.rep}</span></div>
+            ${Object.keys(ex.cross||{}).length?`<div style="font-size:6px;color:var(--text-dim);margin-top:3px">CROSS: ${Object.entries(ex.cross).map(([m2,r])=>M[m2]?.n+' '+Math.round(r*100)+'%').join(', ')}</div>`:''}</div>`).join('')}
+        </div></div>`;
+    }).join('')}
+    </div>`;
+}
+
+// ========== DATA PAGE ==========
+function renderData() {
+  const p=document.getElementById('p-data');
+  if(!p) return;
+  const ts=S.workouts.reduce((s,w)=>s+w.sets.length,0);
+  const sz=(JSON.stringify(S).length/1024).toFixed(1);
+  p.innerHTML=`
+    <div class="card"><div class="card-title">💾 DATA</div>
+      <div style="font-size:7px;color:var(--text-dim);margin-bottom:10px;line-height:1.8">
+        DATA SIZE: ${sz} KB<br>WORKOUTS: ${S.workouts.length}<br>TOTAL SETS: ${ts}<br>CUSTOM EXERCISES: ${Object.values(S.customEx).reduce((s,a)=>s+a.length,0)}
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="exportD()">EXPORT JSON</button>
+        <button class="btn btn-cyan" onclick="document.getElementById('impF').click()">IMPORT JSON</button>
+      </div>
+      <input type="file" id="impF" accept=".json" style="display:none" onchange="importD(event)">
+      <button class="btn btn-red btn-block btn-sm" onclick="resetAll()" style="margin-top:8px">RESET ALL DATA</button>
+    </div>
+    <div class="card"><div class="card-title">⚔ RANK SYSTEM</div>
+      <div style="font-size:7px;color:var(--text-dim);line-height:2">
+        ${RANKS.map(r=>`${rankBadge(r.min)} LV${r.min}+`).join('<br>')}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">✧ XP SYSTEM</div>
+      <div style="font-size:7px;color:var(--text-dim);line-height:2">
+        PER SET: +${XP_SET} XP<br>PER REP: +${XP_REP} XP<br>WEIGHT: +${XP_KG} XP/KG<br>COMPOUND: ${XP_COMP}x BONUS<br>CROSSOVER: 50% x RATIO<br>LEVEL: 100 * 1.35^(LV-1) XP
+      </div>
+    </div>`;
+}
+function exportD(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='ironquest_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(u);showToast('EXPORTED');}
+function importD(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.workouts||!d.mx){showToast('INVALID FILE');return;}if(!confirm('REPLACE ALL DATA?'))return;S=d;if(!S.meas)S.meas=[];if(!S.tpl)S.tpl=[];if(!S.customEx)S.customEx={};Object.keys(M).forEach(k=>{if(!S.mx[k])S.mx[k]={xp:0,lv:1};});saveS();updHeader();renderMap();showToast('IMPORTED');}catch(err){showToast('ERROR');}};r.readAsText(f);e.target.value='';}
+function resetAll(){if(!confirm('DELETE ALL DATA?'))return;if(!confirm('REALLY SURE?'))return;S=defaultS();saveS();updHeader();renderMap();showToast('RESET');}
+
+// ========== UTILS ==========
+function fmtN(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+
+// Keyboard
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&document.getElementById('p-tools')?.classList.contains('active')){const a=document.activeElement;if(a.tagName!=='INPUT'&&a.tagName!=='SELECT'){e.preventDefault();toggleTm();}}if(e.key==='Escape')closeModal();});
+
+// Service Worker
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+// Init
+updHeader();
+renderMap();
+</script>
+</body>
+</html>
